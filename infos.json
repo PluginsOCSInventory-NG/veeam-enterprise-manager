@@ -1,0 +1,10 @@
+{
+  "displayName" : "Veeam Enterprise Manager inventory",
+  "author" : ["Gilles DUBOIS"],
+  "contributor" : [],
+  "supportedAgent" : ["Unix"],
+  "description" : {
+    "fr" : "Permet d'interroger l'API Veeam Enterprise Manager et de renvoyer les informations lors de l'inventaire",
+    "en" : "Call Veeam Enterprise Manager API and send retrivied informations in inventory"
+  }
+}
