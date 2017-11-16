@@ -125,7 +125,7 @@ class VeeamDetails {
         if ($activeMenu == $value) {
             echo "class='active'";
         }
-        echo " ><a href='?function=vmware&list=".$value."'>".$key."</a></li>";
+        echo " ><a href='?function=veeam&list=".$value."'>".$key."</a></li>";
     }
     echo '</ul>';
   }
