@@ -35,6 +35,9 @@ function plugin_init_veeam()
 
 $object = new plugins;
 
+// Add menu
+$object -> add_menu ("veeam","21000","veeam","Veeam Backup Management","plugins");
+
 // Veeam backup server table
 $object -> sql_query("CREATE TABLE IF NOT EXISTS `VEEAM_BACKUP_SERVERS` (
                       `ID` INT(11) NOT NULL AUTO_INCREMENT,
@@ -123,7 +126,8 @@ function plugin_delete_veeam()
 {
 
 $object = new plugins;
-
+// Del menu
+$object -> del_menu ("veeam","21000","Veeam Backup Management","plugins");
 // Veeam tables drop
 $object -> sql_query("DROP TABLE `VEEAM_BACKUP_SERVERS`");
 $object -> sql_query("DROP TABLE `VEEAM_REPOSITORIES`");
