@@ -21,119 +21,124 @@
  * MA 02110-1301, USA.
  */
 
+ /**
+  * This function is called on installation and is used to create database schema for the plugin
+  */
 
-function plugin_version_veeam()
-{
-return array('name' => 'Veeam inventory',
-'version' => '1.0',
-'author'=> 'Gilles Dubois',
-'license' => 'GPLv3',
-'verMinOcs' => '2.3');
-}
+ function extension_install_veeam_enterprise_manager()
+ {
+     $commonObject = new ExtensionCommon;
 
-function plugin_init_veeam()
-{
+     $commonObject -> sqlQuery("
+                     CREATE TABLE IF NOT EXISTS `uselesstable` (
+                     `ID` INT(11) NOT NULL AUTO_INCREMENT,
+                     `HARDWARE_ID` INT(11) NOT NULL,
+                     `NAME` VARCHAR(255) NOT NULL,
+                     PRIMARY KEY (`ID`,`HARDWARE_ID`)
+                     ) ENGINE=INNODB;");
 
-$object = new plugins;
+     // Veeam backup server table
+     $commonObject -> sqlQuery("CREATE TABLE IF NOT EXISTS `VEEAM_BACKUP_SERVERS` (
+                           `ID` INT(11) NOT NULL AUTO_INCREMENT,
+                           `HARDWARE_ID` INT(11) NOT NULL,
+                           `NAME` VARCHAR(255) DEFAULT NULL,
+                           `UID` VARCHAR(255) DEFAULT NULL,
+                           PRIMARY KEY  (`ID`,`HARDWARE_ID`)
+                           ) ENGINE=INNODB;");
 
-// Add menu
-$object -> add_menu ("veeam","21000","veeam","Veeam Backup Management","plugins");
+     // Veeam repositories table
+     $commonObject -> sqlQuery("CREATE TABLE IF NOT EXISTS `VEEAM_REPOSITORIES` (
+                           `ID` INT(11) NOT NULL AUTO_INCREMENT,
+                           `HARDWARE_ID` INT(11) NOT NULL,
+                           `NAME` VARCHAR(255) DEFAULT NULL,
+                           `KIND` VARCHAR(255) DEFAULT NULL,
+                           `UID` VARCHAR(255) DEFAULT NULL,
+                           `FREESPACE` VARCHAR(255) DEFAULT NULL,
+                           `CAPACITY` VARCHAR(255) DEFAULT NULL,
+                           `TYPE` VARCHAR(255) DEFAULT NULL,
+                           PRIMARY KEY  (`ID`,`HARDWARE_ID`)
+                           ) ENGINE=INNODB;");
 
-// Veeam backup server table
-$object -> sql_query("CREATE TABLE IF NOT EXISTS `VEEAM_BACKUP_SERVERS` (
-                      `ID` INT(11) NOT NULL AUTO_INCREMENT,
-                      `HARDWARE_ID` INT(11) NOT NULL,
-                      `NAME` VARCHAR(255) DEFAULT NULL,
-                      `UID` VARCHAR(255) DEFAULT NULL,
-                      PRIMARY KEY  (`ID`,`HARDWARE_ID`)
-                      ) ENGINE=INNODB;");
+     // Veeam jobs table
+     $commonObject -> sqlQuery("CREATE TABLE IF NOT EXISTS `VEEAM_JOBS` (
+                           `ID` INT(11) NOT NULL AUTO_INCREMENT,
+                           `HARDWARE_ID` INT(11) NOT NULL,
+                           `NAME` VARCHAR(255) DEFAULT NULL,
+                           `DESCRIPTION` VARCHAR(255) DEFAULT NULL,
+                           `UID` VARCHAR(255) DEFAULT NULL,
+                           `JOBTYPE` VARCHAR(255) DEFAULT NULL,
+                           `IS_SCHEDULED` VARCHAR(255) DEFAULT NULL,
+                           `IS_CONFIGURED` VARCHAR(255) DEFAULT NULL,
+                           `PLATFORM` VARCHAR(255) DEFAULT NULL,
+                           `NEXT_RUN` VARCHAR(255) DEFAULT NULL,
+                           `RETRY_ENABLED` VARCHAR(255) DEFAULT NULL,
+                           `BACKUP_TYPE` VARCHAR(255) DEFAULT NULL,
+                           `BACKUP_KIND` VARCHAR(255) DEFAULT NULL,
+                           `BACKUP_OPTIONS` VARCHAR(255) DEFAULT NULL,
+                           PRIMARY KEY  (`ID`,`HARDWARE_ID`)
+                           ) ENGINE=INNODB;");
 
-// Veeam repositories table
-$object -> sql_query("CREATE TABLE IF NOT EXISTS `VEEAM_REPOSITORIES` (
-                      `ID` INT(11) NOT NULL AUTO_INCREMENT,
-                      `HARDWARE_ID` INT(11) NOT NULL,
-                      `NAME` VARCHAR(255) DEFAULT NULL,
-                      `KIND` VARCHAR(255) DEFAULT NULL,
-                      `UID` VARCHAR(255) DEFAULT NULL,
-                      `FREESPACE` VARCHAR(255) DEFAULT NULL,
-                      `CAPACITY` VARCHAR(255) DEFAULT NULL,
-                      `TYPE` VARCHAR(255) DEFAULT NULL,
-                      PRIMARY KEY  (`ID`,`HARDWARE_ID`)
-                      ) ENGINE=INNODB;");
+     // Veeam jobs backup sessions table
+     $commonObject -> sqlQuery("CREATE TABLE IF NOT EXISTS `VEEAM_JOBS_BACKUP_SESSIONS` (
+                           `ID` INT(11) NOT NULL AUTO_INCREMENT,
+                           `HARDWARE_ID` INT(11) NOT NULL,
+                           `NAME` VARCHAR(255) DEFAULT NULL,
+                           `UID` VARCHAR(255) DEFAULT NULL,
+                           `JOB_NAME` VARCHAR(255) DEFAULT NULL,
+                           `JOB_TYPE` VARCHAR(255) DEFAULT NULL,
+                           `RESULT` VARCHAR(255) DEFAULT NULL,
+                           `RETRY_ENABLED` VARCHAR(255) DEFAULT NULL,
+                           `STATE` VARCHAR(255) DEFAULT NULL,
+                           `CREATION_TIME` VARCHAR(255) DEFAULT NULL,
+                           `END_TIME` VARCHAR(255) DEFAULT NULL,
+                           PRIMARY KEY  (`ID`,`HARDWARE_ID`)
+                           ) ENGINE=INNODB;");
 
-// Veeam jobs table
-$object -> sql_query("CREATE TABLE IF NOT EXISTS `VEEAM_JOBS` (
-                      `ID` INT(11) NOT NULL AUTO_INCREMENT,
-                      `HARDWARE_ID` INT(11) NOT NULL,
-                      `NAME` VARCHAR(255) DEFAULT NULL,
-                      `DESCRIPTION` VARCHAR(255) DEFAULT NULL,
-                      `UID` VARCHAR(255) DEFAULT NULL,
-                      `JOBTYPE` VARCHAR(255) DEFAULT NULL,
-                      `IS_SCHEDULED` VARCHAR(255) DEFAULT NULL,
-                      `IS_CONFIGURED` VARCHAR(255) DEFAULT NULL,
-                      `PLATFORM` VARCHAR(255) DEFAULT NULL,
-                      `NEXT_RUN` VARCHAR(255) DEFAULT NULL,
-                      `RETRY_ENABLED` VARCHAR(255) DEFAULT NULL,
-                      `BACKUP_TYPE` VARCHAR(255) DEFAULT NULL,
-                      `BACKUP_KIND` VARCHAR(255) DEFAULT NULL,
-                      `BACKUP_OPTIONS` VARCHAR(255) DEFAULT NULL,
-                      PRIMARY KEY  (`ID`,`HARDWARE_ID`)
-                      ) ENGINE=INNODB;");
+     // Veeam jobs backup sessions table
+     $commonObject -> sqlQuery("CREATE TABLE IF NOT EXISTS `VEEAM_JOBS_VMS` (
+                           `ID` INT(11) NOT NULL AUTO_INCREMENT,
+                           `HARDWARE_ID` INT(11) NOT NULL,
+                           `NAME` VARCHAR(255) DEFAULT NULL,
+                           `DISPLAY_NAME` VARCHAR(255) DEFAULT NULL,
+                           `JOB_NAME` VARCHAR(255) DEFAULT NULL,
+                           `HIERARCHY_REF` VARCHAR(255) DEFAULT NULL,
+                           `VM_UID` VARCHAR(255) DEFAULT NULL,
+                           PRIMARY KEY  (`ID`,`HARDWARE_ID`)
+                           ) ENGINE=INNODB;");
 
-// Veeam jobs backup sessions table
-$object -> sql_query("CREATE TABLE IF NOT EXISTS `VEEAM_JOBS_BACKUP_SESSIONS` (
-                      `ID` INT(11) NOT NULL AUTO_INCREMENT,
-                      `HARDWARE_ID` INT(11) NOT NULL,
-                      `NAME` VARCHAR(255) DEFAULT NULL,
-                      `UID` VARCHAR(255) DEFAULT NULL,
-                      `JOB_NAME` VARCHAR(255) DEFAULT NULL,
-                      `JOB_TYPE` VARCHAR(255) DEFAULT NULL,
-                      `RESULT` VARCHAR(255) DEFAULT NULL,
-                      `RETRY_ENABLED` VARCHAR(255) DEFAULT NULL,
-                      `STATE` VARCHAR(255) DEFAULT NULL,
-                      `CREATION_TIME` VARCHAR(255) DEFAULT NULL,
-                      `END_TIME` VARCHAR(255) DEFAULT NULL,
-                      PRIMARY KEY  (`ID`,`HARDWARE_ID`)
-                      ) ENGINE=INNODB;");
+     // Veeam jobs backup sessions table
+     $commonObject -> sqlQuery("CREATE TABLE IF NOT EXISTS `VEEAM_VM_RESTORE_POINT` (
+                           `ID` INT(11) NOT NULL AUTO_INCREMENT,
+                           `HARDWARE_ID` INT(11) NOT NULL,
+                           `NAME` VARCHAR(255) DEFAULT NULL,
+                           `UID` VARCHAR(255) DEFAULT NULL,
+                           `BACKUP_SERVER` VARCHAR(255) DEFAULT NULL,
+                           `VAPP_NAME` VARCHAR(255) DEFAULT NULL,
+                           `FILE_REFERENCE` VARCHAR(255) DEFAULT NULL,
+                           `CREATION_DATE` VARCHAR(255) DEFAULT NULL,
+                           PRIMARY KEY  (`ID`,`HARDWARE_ID`)
+                           ) ENGINE=INNODB;");
+ }
 
-// Veeam jobs backup sessions table
-$object -> sql_query("CREATE TABLE IF NOT EXISTS `VEEAM_JOBS_VMS` (
-                      `ID` INT(11) NOT NULL AUTO_INCREMENT,
-                      `HARDWARE_ID` INT(11) NOT NULL,
-                      `NAME` VARCHAR(255) DEFAULT NULL,
-                      `DISPLAY_NAME` VARCHAR(255) DEFAULT NULL,
-                      `JOB_NAME` VARCHAR(255) DEFAULT NULL,
-                      `HIERARCHY_REF` VARCHAR(255) DEFAULT NULL,
-                      `VM_UID` VARCHAR(255) DEFAULT NULL,
-                      PRIMARY KEY  (`ID`,`HARDWARE_ID`)
-                      ) ENGINE=INNODB;");
+ /**
+  * This function is called on removal and is used to destroy database schema for the plugin
+  */
+ function extension_delete_veeam_enterprise_manager()
+ {
+     $commonObject = new ExtensionCommon;
+     // Veeam tables drop
+     $commonObject -> sqlQuery("DROP TABLE `VEEAM_BACKUP_SERVERS`");
+     $commonObject -> sqlQuery("DROP TABLE `VEEAM_REPOSITORIES`");
+     $commonObject -> sqlQuery("DROP TABLE `VEEAM_JOBS`");
+     $commonObject -> sqlQuery("DROP TABLE `VEEAM_JOBS_BACKUP_SESSIONS`");
+     $commonObject -> sqlQuery("DROP TABLE `VEEAM_JOBS_VMS`");
+     $commonObject -> sqlQuery("DROP TABLE `VEEAM_VM_RESTORE_POINT`");
+ }
 
-// Veeam jobs backup sessions table
-$object -> sql_query("CREATE TABLE IF NOT EXISTS `VEEAM_VM_RESTORE_POINT` (
-                      `ID` INT(11) NOT NULL AUTO_INCREMENT,
-                      `HARDWARE_ID` INT(11) NOT NULL,
-                      `NAME` VARCHAR(255) DEFAULT NULL,
-                      `UID` VARCHAR(255) DEFAULT NULL,
-                      `BACKUP_SERVER` VARCHAR(255) DEFAULT NULL,
-                      `VAPP_NAME` VARCHAR(255) DEFAULT NULL,
-                      `FILE_REFERENCE` VARCHAR(255) DEFAULT NULL,
-                      `CREATION_DATE` VARCHAR(255) DEFAULT NULL,
-                      PRIMARY KEY  (`ID`,`HARDWARE_ID`)
-                      ) ENGINE=INNODB;");
+ /**
+  * This function is called on plugin upgrade
+  */
+ function extension_upgrade_veeam_enterprise_manager()
+ {
 
-}
-
-function plugin_delete_veeam()
-{
-
-$object = new plugins;
-// Del menu
-$object -> del_menu ("veeam","21000","Veeam Backup Management","plugins");
-// Veeam tables drop
-$object -> sql_query("DROP TABLE `VEEAM_BACKUP_SERVERS`");
-$object -> sql_query("DROP TABLE `VEEAM_REPOSITORIES`");
-$object -> sql_query("DROP TABLE `VEEAM_JOBS`");
-$object -> sql_query("DROP TABLE `VEEAM_JOBS_BACKUP_SESSIONS`");
-$object -> sql_query("DROP TABLE `VEEAM_JOBS_VMS`");
-$object -> sql_query("DROP TABLE `VEEAM_VM_RESTORE_POINT`");
-}
+ }
