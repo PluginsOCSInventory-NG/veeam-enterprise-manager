@@ -6,7 +6,7 @@
     </hook>
     <hook type="submenu">
         <mainmenuidentifier>ms_extension</mainmenuidentifier>
-        <identifier>ms_veeam</identifier>
+        <identifier>ms_veeam_enterprise_manager</identifier>
         <translation>35000</translation>
     </hook>
 </hookstore>
