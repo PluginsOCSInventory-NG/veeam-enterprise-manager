@@ -82,7 +82,11 @@ class VeeamDetails {
 
     $listFields = array();
     foreach ($this->fieldArray as $field) {
-      $listFields[$field] = $field;
+       $fieldTranslation = $field;
+       if($field == "NAME"){
+        $fieldTranslation = $this->tableName;
+       }
+       $listFields[$fieldTranslation] = $field;
     }
     $defaultFields = $listFields;
 
